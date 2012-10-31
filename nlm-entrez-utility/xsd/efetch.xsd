@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xs:element name="PubmedArticleSet">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="PubmedArticle"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="PubmedArticle">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="MedlineCitation"/>
+        <xs:element ref="PubmedData"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="MedlineCitation">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="PMID"/>
+        <xs:element ref="DateCreated"/>
+        <xs:element ref="DateCompleted"/>
+        <xs:element ref="Article"/>
+        <xs:element ref="MedlineJournalInfo"/>
+        <xs:element ref="ChemicalList"/>
+        <xs:element maxOccurs="unbounded" ref="CitationSubset"/>
+        <xs:element minOccurs="0" ref="CommentsCorrectionsList"/>
+        <xs:element ref="MeshHeadingList"/>
+      </xs:sequence>
+      <xs:attribute name="Owner" use="required" type="xs:NCName"/>
+      <xs:attribute name="Status" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="DateCreated">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Year"/>
+        <xs:element ref="Month"/>
+        <xs:element ref="Day"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="DateCompleted">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Year"/>
+        <xs:element ref="Month"/>
+        <xs:element ref="Day"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Article">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Journal"/>
+        <xs:element ref="ArticleTitle"/>
+        <xs:element ref="Pagination"/>
+        <xs:element ref="Abstract"/>
+        <xs:element ref="Affiliation"/>
+        <xs:element ref="AuthorList"/>
+        <xs:element ref="Language"/>
+        <xs:element minOccurs="0" ref="DataBankList"/>
+        <xs:element ref="PublicationTypeList"/>
+        <xs:element minOccurs="0" ref="ArticleDate"/>
+      </xs:sequence>
+      <xs:attribute name="PubModel" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Journal">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="ISSN"/>
+        <xs:element ref="JournalIssue"/>
+        <xs:element ref="Title"/>
+        <xs:element ref="ISOAbbreviation"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="ISSN">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:NMTOKEN">
+          <xs:attribute name="IssnType" use="required" type="xs:NCName"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="JournalIssue">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Volume"/>
+        <xs:element ref="Issue"/>
+        <xs:element ref="PubDate"/>
+      </xs:sequence>
+      <xs:attribute name="CitedMedium" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Volume" type="xs:integer"/>
+  <xs:element name="Issue" type="xs:integer"/>
+  <xs:element name="PubDate">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Year"/>
+        <xs:element ref="Month"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Title" type="xs:string"/>
+  <xs:element name="ISOAbbreviation" type="xs:string"/>
+  <xs:element name="ArticleTitle" type="xs:string"/>
+  <xs:element name="Pagination">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="MedlinePgn"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="MedlinePgn" type="xs:NMTOKEN"/>
+  <xs:element name="Abstract">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="AbstractText"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="AbstractText">
+    <xs:complexType mixed="true">
+      <xs:attribute name="Label"/>
+      <xs:attribute name="NlmCategory" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Affiliation" type="xs:string"/>
+  <xs:element name="AuthorList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="Author"/>
+      </xs:sequence>
+      <xs:attribute name="CompleteYN" use="required" type="xs:NCName"/>
+      <xs:attribute name="Type" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Author">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="LastName"/>
+        <xs:element ref="ForeName"/>
+        <xs:element ref="Initials"/>
+      </xs:sequence>
+      <xs:attribute name="ValidYN" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="LastName" type="xs:NCName"/>
+  <xs:element name="ForeName" type="xs:string"/>
+  <xs:element name="Initials" type="xs:NCName"/>
+  <xs:element name="Language" type="xs:NCName"/>
+  <xs:element name="DataBankList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="DataBank"/>
+      </xs:sequence>
+      <xs:attribute name="CompleteYN" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="DataBank">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="DataBankName"/>
+        <xs:element ref="AccessionNumberList"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="DataBankName" type="xs:NCName"/>
+  <xs:element name="AccessionNumberList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="AccessionNumber"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="AccessionNumber" type="xs:NCName"/>
+  <xs:element name="PublicationTypeList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="PublicationType"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="PublicationType" type="xs:string"/>
+  <xs:element name="ArticleDate">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Year"/>
+        <xs:element ref="Month"/>
+        <xs:element ref="Day"/>
+      </xs:sequence>
+      <xs:attribute name="DateType" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="MedlineJournalInfo">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Country"/>
+        <xs:element ref="MedlineTA"/>
+        <xs:element ref="NlmUniqueID"/>
+        <xs:element ref="ISSNLinking"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Country" type="xs:string"/>
+  <xs:element name="MedlineTA" type="xs:string"/>
+  <xs:element name="NlmUniqueID" type="xs:integer"/>
+  <xs:element name="ISSNLinking" type="xs:NMTOKEN"/>
+  <xs:element name="ChemicalList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="Chemical"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Chemical">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="RegistryNumber"/>
+        <xs:element ref="NameOfSubstance"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="RegistryNumber" type="xs:NMTOKEN"/>
+  <xs:element name="NameOfSubstance" type="xs:string"/>
+  <xs:element name="CitationSubset" type="xs:NCName"/>
+  <xs:element name="CommentsCorrectionsList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="CommentsCorrections"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="CommentsCorrections">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="RefSource"/>
+        <xs:element ref="PMID"/>
+      </xs:sequence>
+      <xs:attribute name="RefType" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="RefSource" type="xs:string"/>
+  <xs:element name="MeshHeadingList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="MeshHeading"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="MeshHeading">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="DescriptorName"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="QualifierName"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="DescriptorName">
+    <xs:complexType mixed="true">
+      <xs:attribute name="MajorTopicYN" use="required" type="xs:NCName"/>
+      <xs:attribute name="Type" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="QualifierName">
+    <xs:complexType mixed="true">
+      <xs:attribute name="MajorTopicYN" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="PubmedData">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="History"/>
+        <xs:element ref="PublicationStatus"/>
+        <xs:element ref="ArticleIdList"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="History">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="PubMedPubDate"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="PubMedPubDate">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Year"/>
+        <xs:element ref="Month"/>
+        <xs:element ref="Day"/>
+        <xs:sequence minOccurs="0">
+          <xs:element ref="Hour"/>
+          <xs:element ref="Minute"/>
+        </xs:sequence>
+      </xs:sequence>
+      <xs:attribute name="PubStatus" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Hour" type="xs:integer"/>
+  <xs:element name="Minute" type="xs:integer"/>
+  <xs:element name="PublicationStatus" type="xs:NCName"/>
+  <xs:element name="ArticleIdList">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="ArticleId"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="ArticleId">
+    <xs:complexType mixed="true">
+      <xs:attribute name="IdType" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="PMID">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:integer">
+          <xs:attribute name="Version" use="required" type="xs:integer"/>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Year" type="xs:integer"/>
+  <xs:element name="Month" type="xs:NMTOKEN"/>
+  <xs:element name="Day" type="xs:integer"/>
+</xs:schema>

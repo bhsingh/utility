@@ -1,0 +1,49 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.biosemantics.wsd</groupId>
+	<artifactId>metamap-client-utility</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>metamap-client</name>
+	<properties>
+		<spring.version>3.0.7.RELEASE</spring.version>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>gov.nih.nlm.nls</groupId>
+			<artifactId>metamap</artifactId>
+			<version>2010</version>
+		</dependency>
+		<dependency>
+			<groupId>sics.se.isl.quintus</groupId>
+			<artifactId>prologbeans</artifactId>
+			<version>0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.6.1</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>0.9.28</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.6</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<!-- abbreviated for all the dependencies -->
+			<artifactId>spring-core</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<!-- abbreviated for all the dependencies -->
+			<artifactId>spring-context</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+	</dependencies>
+</project>

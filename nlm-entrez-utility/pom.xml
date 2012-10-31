@@ -1,0 +1,166 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>gov.nih.nlm.ncbi</groupId>
+	<artifactId>nlm-entrez-utility</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>nlm-entrez-utility</name>
+	<description>nlm-entrez-utility</description>
+	<inceptionYear>2011</inceptionYear>
+	<organization>
+		<name>Department of Medical Informatics, Erasmus MC. Rotterdam.</name>
+		<url>http://www.erasmusmc.nl/med_informatica/?lang=en</url>
+	</organization>
+	<dependencies>
+		<dependency>
+			<groupId>com.sun.xml.ws</groupId>
+			<artifactId>jaxws-rt</artifactId>
+			<version>2.1</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.6</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- Caused by: java.lang.IllegalArgumentException: com.sun.xml.internal.messaging.saaj.soap.LocalStrings != com.sun.xml.messaging.saaj.soap.LocalStrings -->
+		<!-- http://forums.sun.com/thread.jspa?threadID=5265515 -->
+		<dependency>
+			<groupId>com.sun.xml.messaging.saaj</groupId>
+			<artifactId>saaj-impl</artifactId>
+			<version>1.3.1</version>
+		</dependency>
+		<!-- CSV parsing and output -->
+		<dependency>
+			<groupId>net.sf.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+			<version>2.1</version>
+		</dependency>
+		<!-- Logging -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.6.1</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>0.9.26</version>
+			<type>jar</type>
+			<scope>compile</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-collections</groupId>
+			<artifactId>commons-collections</artifactId>
+			<version>3.2.1</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.5</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-client</artifactId>
+			<version>1.12</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>13.0</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+
+			<plugin>
+				<groupId>org.jvnet.jaxb2.maven2</groupId>
+				<artifactId>maven-jaxb2-plugin</artifactId>
+				<version>0.7.2</version>
+				<executions>
+					<execution>
+						<id>esearch</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<!-- <verbose>true</verbose> -->
+							<generateDirectory>${project.build.sourceDirectory}</generateDirectory>
+							<generatePackage>gov.nih.nlm.ncbi.eutils.generated.esearch</generatePackage>
+							<schemaDirectory>xsd</schemaDirectory>
+							<bindingDirectory>xsd</bindingDirectory>
+							<schemaIncludes>
+								<schemaInclude>esearch.xsd</schemaInclude>
+							</schemaIncludes>
+							<removeOldOutput>false</removeOldOutput>
+							<extension>true</extension>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.jvnet.jaxb2.maven2</groupId>
+				<artifactId>maven-jaxb2-plugin</artifactId>
+				<version>0.7.2</version>
+				<executions>
+					<execution>
+						<id>efetch</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<!-- <verbose>true</verbose> -->
+							<generateDirectory>${project.build.sourceDirectory}</generateDirectory>
+							<generatePackage>gov.nih.nlm.ncbi.eutils.generated.efetch</generatePackage>
+							<schemaDirectory>xsd</schemaDirectory>
+							<bindingDirectory>xsd</bindingDirectory>
+							<schemaIncludes>
+								<schemaInclude>efetch.xsd</schemaInclude>
+							</schemaIncludes>
+							<removeOldOutput>false</removeOldOutput>
+							<extension>true</extension>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.jvnet.jaxb2.maven2</groupId>
+				<artifactId>maven-jaxb2-plugin</artifactId>
+				<version>0.7.2</version>
+				<executions>
+					<execution>
+						<id>esummary</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<!-- <verbose>true</verbose> -->
+							<generateDirectory>${project.build.sourceDirectory}</generateDirectory>
+							<generatePackage>gov.nih.nlm.ncbi.eutils.generated.esummary</generatePackage>
+							<schemaDirectory>xsd</schemaDirectory>
+							<bindingDirectory>xsd</bindingDirectory>
+							<schemaIncludes>
+								<schemaInclude>esummary.xsd</schemaInclude>
+							</schemaIncludes>
+							<removeOldOutput>false</removeOldOutput>
+							<extension>true</extension>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- Java 6! -->
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

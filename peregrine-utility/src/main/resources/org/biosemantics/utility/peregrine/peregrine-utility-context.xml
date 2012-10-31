@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	<bean id="peregrineRmiClient" class="org.biosemantics.utility.peregrine.PeregrineRmiClient">
+		<property name="peregrine" ref="peregrine"></property>
+		<property name="ontology" ref="ontology"></property>
+	</bean>
+
+
+	<bean id="peregrine" class="org.springframework.remoting.rmi.RmiProxyFactoryBean">
+		<property name="serviceUrl" value="rmi://localhost:9999/PeregrineService" />
+		<property name="serviceInterface" value="org.erasmusmc.data_mining.peregrine.api.Peregrine" />
+	</bean>
+
+	<bean id="ontology" class="org.springframework.remoting.rmi.RmiProxyFactoryBean">
+		<property name="serviceUrl" value="rmi://localhost:9999/OntologyService" />
+		<property name="serviceInterface" value="org.erasmusmc.data_mining.ontology.api.Ontology" />
+	</bean>
+</beans>
