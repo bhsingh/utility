@@ -1,6 +1,7 @@
 
 *.prefs
+.classpath
+.project
+.settings/
+target/
 
-brat-utility/.classpath
-
-brat-utility/.project
