@@ -1,14 +1,15 @@
 package gov.nih.nlm.ncbi.eutils;
 
+import gov.nih.nlm.ncbi.eutils.generated.efetch.MeshHeading;
 import gov.nih.nlm.ncbi.eutils.generated.efetch.MeshHeadingList;
 import gov.nih.nlm.ncbi.eutils.generated.efetch.PubmedArticle;
 import gov.nih.nlm.ncbi.eutils.generated.efetch.PubmedArticleSet;
+import gov.nih.nlm.ncbi.eutils.generated.efetch.QualifierName;
+import gov.nih.nlm.ncbi.eutils.generated.esearch.Count;
 import gov.nih.nlm.ncbi.eutils.generated.esearch.ESearchResult;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigInteger;
 import java.util.List;
 
 import javax.ws.rs.core.MultivaluedMap;
@@ -19,8 +20,6 @@ import javax.xml.bind.Unmarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import au.com.bytecode.opencsv.CSVWriter;
-
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
@@ -30,6 +29,7 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
  */
 public class PubmedRestClient {
 
+	private static final String DEFAULT_BASE_URL = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/";
 	private Client client;
 	private WebResource eSearchResource;
 	private WebResource eFetchResource;
@@ -42,7 +42,13 @@ public class PubmedRestClient {
 	private static final String ESEARCH = "esearch.fcgi";
 	private static final String EFETCH = "efetch.fcgi";
 
-	public void setBaseUrl(String baseUrl) throws JAXBException {
+	public PubmedRestClient() throws JAXBException {
+		this(DEFAULT_BASE_URL);
+
+	}
+
+	// "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/"
+	public PubmedRestClient(String baseUrl) throws JAXBException {
 		this.baseUrl = baseUrl;
 		client = Client.create();
 		eSearchResource = client.resource(this.baseUrl + ESEARCH);
@@ -51,6 +57,39 @@ public class PubmedRestClient {
 		searchUnmarshaller = jcSearch.createUnmarshaller();
 		jcFetch = JAXBContext.newInstance("gov.nih.nlm.ncbi.eutils.generated.efetch");
 		fetchUnmarshaller = jcFetch.createUnmarshaller();
+	}
+
+	public ESearchResult searchInPubmed(String searchTerm) throws JAXBException {
+		MultivaluedMap<String, String> searchParams = new MultivaluedMapImpl();
+		searchParams.add("db", "pubmed");
+		searchParams.add("term", searchTerm);
+		return search(searchParams);
+	}
+
+	public ESearchResult searchInPubmedForTitle(String title) throws JAXBException {
+		MultivaluedMap<String, String> searchParams = new MultivaluedMapImpl();
+		searchParams.add("db", "pubmed");
+		searchParams.add("field", "title");
+		searchParams.add("term", title);
+		return search(searchParams);
+	}
+
+	public PubmedArticle fetchPubmedArticleForPmid(long pmid) throws JAXBException {
+		MultivaluedMap<String, String> fetchParams = new MultivaluedMapImpl();
+		fetchParams.add("db", "pubmed");
+		fetchParams.add("id", String.valueOf(pmid));
+		fetchParams.add("format", "xml");
+		PubmedArticleSet pubmedArticleSet = fetch(fetchParams);
+		if (pubmedArticleSet != null) {
+			List<Object> objects = pubmedArticleSet.getPubmedArticleOrPubmedBookArticle();
+			if (objects.size() == 1) {
+				if (objects.get(0) instanceof PubmedArticle) {
+					PubmedArticle pubmedArticle = (PubmedArticle) objects.get(0);
+					return pubmedArticle;
+				}
+			}
+		}
+		throw new IllegalStateException();
 	}
 
 	/*
@@ -69,7 +108,15 @@ public class PubmedRestClient {
 		} catch (IOException e) {
 			logger.error("could not close ioStream", e);
 		}
-		logger.debug("results count {}", searchResult.getCount().intValue());
+		List<Object> objects = searchResult
+				.getCountOrRetMaxOrRetStartOrQueryKeyOrWebEnvOrIdListOrTranslationSetOrTranslationStackOrQueryTranslationOrERROR();
+		for (Object object : objects) {
+			if (object instanceof Count) {
+				Count count = (Count) object;
+				logger.debug("results count {}", count.getvalue());
+				break;
+			}
+		}
 		return searchResult;
 	}
 
@@ -82,48 +129,46 @@ public class PubmedRestClient {
 	public PubmedArticleSet fetch(MultivaluedMap<String, String> queryParams) throws JAXBException {
 		logger.debug("making efetch query with params {}", queryParams.toString());
 		InputStream is = eFetchResource.queryParams(queryParams).post(InputStream.class);
-		PubmedArticleSet pubmedArticleSet = (PubmedArticleSet) fetchUnmarshaller.unmarshal(is);
+		Object obj = fetchUnmarshaller.unmarshal(is);
+		PubmedArticleSet pubmedArticleSet = (PubmedArticleSet) obj;
 		try {
 			is.close();
 		} catch (IOException e) {
 			logger.error("could not close ioStream", e);
 		}
-		logger.debug("results count {}", pubmedArticleSet.getPubmedArticle().size());
+		logger.debug("results count {}", pubmedArticleSet.getPubmedArticleOrPubmedBookArticle().size());
 		return pubmedArticleSet;
 	}
 
-	public MeshHeadingList getMeshHeadingList(String pmid) throws JAXBException {
+	public MeshHeadingList getMeshHeadingListForPubmedArticle(long pmid) throws JAXBException {
 		logger.debug("fetchMeshHeadings query with params {}", pmid);
 		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
 		params.add("db", "pubmed");
 		params.add("retmode", "xml");
-		params.add("id", pmid);
+		params.add("id", String.valueOf(pmid));
 		PubmedArticleSet pubmedArticleSet = fetch(params);
-		List<PubmedArticle> pubmedArticles = pubmedArticleSet.getPubmedArticle();
-		PubmedArticle pubmedArticle = pubmedArticles.get(0);
-		return pubmedArticle.getMedlineCitation().getMeshHeadingList();
-
-	}
-
-	public void destroy() {
-	}
-
-	public static void main(String[] args) throws JAXBException, IOException {
-		PubmedRestClient pubmedRestClient = new PubmedRestClient();
-		pubmedRestClient.setBaseUrl("http://eutils.ncbi.nlm.nih.gov/entrez/eutils/");
-		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
-		params.add("db", "pubmed");
-		params.add("term", "21723759");
-		params.add("retmax", "10");
-		ESearchResult eSearchResult = pubmedRestClient.search(params);
-		List<BigInteger> ids = eSearchResult.getIdList().getId();
-		CSVWriter csvWriter = new CSVWriter(new FileWriter("/Users/bhsingh/Desktop/out.txt"));
-		for (BigInteger bigInteger : ids) {
-			// System.out.println(bigInteger.intValue());
-			csvWriter.writeNext(new String[] { String.valueOf(bigInteger.intValue()) });
-
+		List<Object> objects = pubmedArticleSet.getPubmedArticleOrPubmedBookArticle();
+		if (objects.size() == 1) {
+			PubmedArticle pubmedArticle = (PubmedArticle) objects.get(0);
+			return pubmedArticle.getMedlineCitation().getMeshHeadingList();
 		}
-		csvWriter.flush();
-		csvWriter.close();
+		throw new IllegalStateException();
+
 	}
+
+	public static void main(String[] args) throws JAXBException {
+		PubmedRestClient restClient = new PubmedRestClient();
+		restClient.searchInPubmed("Malaria");
+		restClient
+				.searchInPubmedForTitle("Anaesthetic influences on brain haemodynamics in the rat and their significance to biochemical, neuropharmacological and drug disposition studies.");
+		PubmedArticle pubmedArticle = restClient.fetchPubmedArticleForPmid(2764997L);
+		logger.info("{}", pubmedArticle.getMedlineCitation().getPMID().getvalue());
+		MeshHeadingList mesHeadingList = restClient.getMeshHeadingListForPubmedArticle(2764997L);
+		for (MeshHeading meshHeading : mesHeadingList.getMeshHeading()) {
+			for (QualifierName qualifierName : meshHeading.getQualifierName()) {
+				logger.info("{} ({})/{} ({})", new Object[]{meshHeading.getDescriptorName().getvalue(),meshHeading.getDescriptorName().getMajorTopicYN(), qualifierName.getvalue(), qualifierName.getMajorTopicYN()});	
+			}
+		}
+	}
+
 }
