@@ -81,7 +81,7 @@
 			<plugin>
 				<groupId>org.jvnet.jaxb2.maven2</groupId>
 				<artifactId>maven-jaxb2-plugin</artifactId>
-				<version>0.7.2</version>
+				<version>0.8.3</version>
 				<executions>
 					<execution>
 						<id>esearch</id>
@@ -106,7 +106,7 @@
 			<plugin>
 				<groupId>org.jvnet.jaxb2.maven2</groupId>
 				<artifactId>maven-jaxb2-plugin</artifactId>
-				<version>0.7.2</version>
+				<version>0.8.3</version>
 				<executions>
 					<execution>
 						<id>efetch</id>
@@ -131,7 +131,7 @@
 			<plugin>
 				<groupId>org.jvnet.jaxb2.maven2</groupId>
 				<artifactId>maven-jaxb2-plugin</artifactId>
-				<version>0.7.2</version>
+				<version>0.8.3</version>
 				<executions>
 					<execution>
 						<id>esummary</id>
@@ -146,6 +146,31 @@
 							<bindingDirectory>xsd</bindingDirectory>
 							<schemaIncludes>
 								<schemaInclude>esummary.xsd</schemaInclude>
+							</schemaIncludes>
+							<removeOldOutput>false</removeOldOutput>
+							<extension>true</extension>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.jvnet.jaxb2.maven2</groupId>
+				<artifactId>maven-jaxb2-plugin</artifactId>
+				<version>0.8.3</version>
+				<executions>
+					<execution>
+						<id>nlm-articleset</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<!-- <verbose>true</verbose> -->
+							<generateDirectory>${project.build.sourceDirectory}</generateDirectory>
+							<generatePackage>gov.nih.nlm.ncbi.eutils.generated.articleset</generatePackage>
+							<schemaDirectory>xsd</schemaDirectory>
+							<bindingDirectory>xsd</bindingDirectory>
+							<schemaIncludes>
+								<schemaInclude>nlm-articleset-2.0.dtd</schemaInclude>
 							</schemaIncludes>
 							<removeOldOutput>false</removeOldOutput>
 							<extension>true</extension>

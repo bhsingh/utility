@@ -5,6 +5,7 @@ import gov.nih.nlm.ncbi.eutils.generated.efetch.PubmedArticle;
 import gov.nih.nlm.ncbi.eutils.generated.efetch.PubmedArticleSet;
 import gov.nih.nlm.ncbi.eutils.generated.esearch.ESearchResult;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
@@ -17,6 +18,8 @@ import javax.xml.bind.Unmarshaller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import au.com.bytecode.opencsv.CSVWriter;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
@@ -50,6 +53,13 @@ public class PubmedRestClient {
 		fetchUnmarshaller = jcFetch.createUnmarshaller();
 	}
 
+	/*
+	 * Pubmed central:
+	 * http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?
+	 * db=pmc&field=title
+	 * &term=Accuracy%20of%20single%20progesterone%20test%20to%20predict%
+	 * 20early%20pregnancy%20outcome%20in%20women%20with%20pain%20or%20bleeding:%20meta-analysis%20of%20cohort%20studies.
+	 */
 	public ESearchResult search(MultivaluedMap<String, String> queryParams) throws JAXBException {
 		logger.debug("making esearch query with params {}", queryParams.toString());
 		InputStream is = eSearchResource.queryParams(queryParams).get(InputStream.class);
@@ -64,6 +74,11 @@ public class PubmedRestClient {
 	}
 
 	// http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=11850928,11482001&format=xml
+	/*
+	 * Pubmed central:
+	 * http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db
+	 * =pmc&id=3460254
+	 */
 	public PubmedArticleSet fetch(MultivaluedMap<String, String> queryParams) throws JAXBException {
 		logger.debug("making efetch query with params {}", queryParams.toString());
 		InputStream is = eFetchResource.queryParams(queryParams).post(InputStream.class);
@@ -98,12 +113,17 @@ public class PubmedRestClient {
 		pubmedRestClient.setBaseUrl("http://eutils.ncbi.nlm.nih.gov/entrez/eutils/");
 		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
 		params.add("db", "pubmed");
-		params.add("term", "malaria");
+		params.add("term", "21723759");
 		params.add("retmax", "10");
 		ESearchResult eSearchResult = pubmedRestClient.search(params);
 		List<BigInteger> ids = eSearchResult.getIdList().getId();
+		CSVWriter csvWriter = new CSVWriter(new FileWriter("/Users/bhsingh/Desktop/out.txt"));
 		for (BigInteger bigInteger : ids) {
-			System.out.println(bigInteger.intValue());
+			// System.out.println(bigInteger.intValue());
+			csvWriter.writeNext(new String[] { String.valueOf(bigInteger.intValue()) });
+
 		}
+		csvWriter.flush();
+		csvWriter.close();
 	}
 }
