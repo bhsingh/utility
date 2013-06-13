@@ -1,5 +1,6 @@
 package gov.nih.nlm.ncbi.eutils;
 
+import gov.nih.nlm.ncbi.eutils.generated.articleset.PmcArticleset;
 import gov.nih.nlm.ncbi.eutils.generated.efetch.MeshHeading;
 import gov.nih.nlm.ncbi.eutils.generated.efetch.MeshHeadingList;
 import gov.nih.nlm.ncbi.eutils.generated.efetch.PubmedArticle;
@@ -35,8 +36,10 @@ public class PubmedRestClient {
 	private WebResource eFetchResource;
 	private JAXBContext jcSearch;
 	private JAXBContext jcFetch;
+	private JAXBContext pmcJaxbContext;
 	private Unmarshaller searchUnmarshaller;
 	private Unmarshaller fetchUnmarshaller;
+	private Unmarshaller pmcUnmarshaller;
 	private String baseUrl;
 	private static final Logger logger = LoggerFactory.getLogger(PubmedRestClient.class);
 	private static final String ESEARCH = "esearch.fcgi";
@@ -57,16 +60,34 @@ public class PubmedRestClient {
 		searchUnmarshaller = jcSearch.createUnmarshaller();
 		jcFetch = JAXBContext.newInstance("gov.nih.nlm.ncbi.eutils.generated.efetch");
 		fetchUnmarshaller = jcFetch.createUnmarshaller();
+		pmcJaxbContext = JAXBContext.newInstance("gov.nih.nlm.ncbi.eutils.generated.articleset");
+		pmcUnmarshaller = pmcJaxbContext.createUnmarshaller();
 	}
 
-	public ESearchResult searchInPubmed(String searchTerm) throws JAXBException {
+	/**
+	 * Retrieve PMIDs from PubMed for a search string
+	 * 
+	 * @param searchTerm
+	 *            search string (same as Pubmed web interface)
+	 * @return
+	 * @throws JAXBException
+	 */
+	public ESearchResult searchPubmed(String searchTerm) throws JAXBException {
 		MultivaluedMap<String, String> searchParams = new MultivaluedMapImpl();
 		searchParams.add("db", "pubmed");
 		searchParams.add("term", searchTerm);
 		return search(searchParams);
 	}
 
-	public ESearchResult searchInPubmedForTitle(String title) throws JAXBException {
+	/**
+	 * Retrieve PMIDs from PubMed for a article title
+	 * 
+	 * @param the
+	 *            title of the article
+	 * @return
+	 * @throws JAXBException
+	 */
+	public ESearchResult searchPubmedByTitle(String title) throws JAXBException {
 		MultivaluedMap<String, String> searchParams = new MultivaluedMapImpl();
 		searchParams.add("db", "pubmed");
 		searchParams.add("field", "title");
@@ -74,7 +95,14 @@ public class PubmedRestClient {
 		return search(searchParams);
 	}
 
-	public PubmedArticle fetchPubmedArticleForPmid(long pmid) throws JAXBException {
+	/**
+	 * Fetch PubMed article metadata and abstract
+	 * 
+	 * @param pmid
+	 * @return
+	 * @throws JAXBException
+	 */
+	public PubmedArticle fetchPubmedArticle(long pmid) throws JAXBException {
 		MultivaluedMap<String, String> fetchParams = new MultivaluedMapImpl();
 		fetchParams.add("db", "pubmed");
 		fetchParams.add("id", String.valueOf(pmid));
@@ -140,8 +168,14 @@ public class PubmedRestClient {
 		return pubmedArticleSet;
 	}
 
-	public MeshHeadingList getMeshHeadingListForPubmedArticle(long pmid) throws JAXBException {
-		logger.debug("fetchMeshHeadings query with params {}", pmid);
+	/**
+	 * Utility method to retrieve the Mesh Headings for an PubMed article
+	 * 
+	 * @param pmid
+	 * @return
+	 * @throws JAXBException
+	 */
+	public MeshHeadingList fetchMeshHeadingsForPubmedArticle(long pmid) throws JAXBException {
 		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
 		params.add("db", "pubmed");
 		params.add("retmode", "xml");
@@ -153,22 +187,87 @@ public class PubmedRestClient {
 			return pubmedArticle.getMedlineCitation().getMeshHeadingList();
 		}
 		throw new IllegalStateException();
+	}
 
+	/**
+	 * Search PubMed Central for full text articles using a query string.
+	 * 
+	 * @param searchTerm
+	 *            the searchterm same as the pubmed central web interface
+	 * @return
+	 * @throws JAXBException
+	 */
+	public ESearchResult seachPubmedCentral(String searchTerm) throws JAXBException {
+		MultivaluedMap<String, String> searchParams = new MultivaluedMapImpl();
+		searchParams.add("db", "pmc");
+		searchParams.add("term", searchTerm);
+		return search(searchParams);
+	}
+
+	/**
+	 * Search PubMed Central for full text articles using a query string.
+	 * 
+	 * @param title
+	 * @return
+	 * @throws JAXBException
+	 */
+	public ESearchResult seachPubmedCentralByTitle(String title) throws JAXBException {
+		MultivaluedMap<String, String> searchParams = new MultivaluedMapImpl();
+		searchParams.add("db", "pmc");
+		searchParams.add("field", "title");
+		searchParams.add("term", title);
+		return search(searchParams);
+	}
+
+	/**
+	 * retrieves a full text for an article from PubMed Central
+	 * @param pmcId
+	 * @return
+	 * @throws JAXBException
+	 */
+	public PmcArticleset fetchFullTextArticle(String pmcId) throws JAXBException {
+		MultivaluedMap<String, String> params = new MultivaluedMapImpl();
+		params.add("db", "pmc");
+		params.add("retmode", "xml");
+		params.add("id", String.valueOf(pmcId));
+		return pmcFetch(params);
+	}
+
+	public PmcArticleset pmcFetch(MultivaluedMap<String, String> params) throws JAXBException {
+		logger.debug("making efetch query with params {}", params.toString());
+		InputStream is = eFetchResource.queryParams(params).post(InputStream.class);
+		Object obj = pmcUnmarshaller.unmarshal(is);
+		PmcArticleset pmcArticleset = (PmcArticleset) obj;
+		try {
+			is.close();
+		} catch (IOException e) {
+			logger.error("could not close ioStream", e);
+		}
+		logger.debug("results count {}", pmcArticleset.getArticle().size());
+		return pmcArticleset;
 	}
 
 	public static void main(String[] args) throws JAXBException {
 		PubmedRestClient restClient = new PubmedRestClient();
-		restClient.searchInPubmed("Malaria");
+		restClient.searchPubmed("Doxapram");
 		restClient
-				.searchInPubmedForTitle("Anaesthetic influences on brain haemodynamics in the rat and their significance to biochemical, neuropharmacological and drug disposition studies.");
-		PubmedArticle pubmedArticle = restClient.fetchPubmedArticleForPmid(2764997L);
+				.searchPubmedByTitle("Anaesthetic influences on brain haemodynamics in the rat and their significance to biochemical, neuropharmacological and drug disposition studies.");
+		PubmedArticle pubmedArticle = restClient.fetchPubmedArticle(2764997L);
 		logger.info("{}", pubmedArticle.getMedlineCitation().getPMID().getvalue());
-		MeshHeadingList mesHeadingList = restClient.getMeshHeadingListForPubmedArticle(2764997L);
+		MeshHeadingList mesHeadingList = restClient.fetchMeshHeadingsForPubmedArticle(2764997L);
 		for (MeshHeading meshHeading : mesHeadingList.getMeshHeading()) {
 			for (QualifierName qualifierName : meshHeading.getQualifierName()) {
-				logger.info("{} ({})/{} ({})", new Object[]{meshHeading.getDescriptorName().getvalue(),meshHeading.getDescriptorName().getMajorTopicYN(), qualifierName.getvalue(), qualifierName.getMajorTopicYN()});	
+				logger.info("{} ({})/{} ({})",
+						new Object[] { meshHeading.getDescriptorName().getvalue(),
+								meshHeading.getDescriptorName().getMajorTopicYN(), qualifierName.getvalue(),
+								qualifierName.getMajorTopicYN() });
 			}
 		}
+		restClient
+				.seachPubmedCentral("Accuracy of single progesterone test to predict early pregnancy outcome in women with pain or bleeding: meta-analysis of cohort studies");
+		restClient
+				.seachPubmedCentralByTitle("Accuracy of single progesterone test to predict early pregnancy outcome in women with pain or bleeding: meta-analysis of cohort studies");
+		restClient.fetchFullTextArticle("3460254");
 	}
 
 }
