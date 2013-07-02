@@ -7,11 +7,11 @@
 	<name>misc-utility</name>
 	<description>Set of unrelated but useful utility classes.</description>
 	<dependencies>
-		<!-- <dependency> -->
-		<!-- <groupId>gov.nih.nlm.ncbi</groupId> -->
-		<!-- <artifactId>nlm-entrez-utility</artifactId> -->
-		<!-- <version>0.0.1-SNAPSHOT</version> -->
-		<!-- </dependency> -->
+		<dependency>
+			<groupId>gov.nih.nlm.ncbi</groupId>
+			<artifactId>nlm-entrez-utility</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 		<dependency>
 			<groupId>net.sf.opencsv</groupId>
 			<artifactId>opencsv</artifactId>

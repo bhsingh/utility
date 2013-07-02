@@ -72,10 +72,11 @@ public class PubmedRestClient {
 	 * @return
 	 * @throws JAXBException
 	 */
-	public ESearchResult searchPubmed(String searchTerm) throws JAXBException {
+	public ESearchResult searchPubmed(String searchTerm, int returnMax) throws JAXBException {
 		MultivaluedMap<String, String> searchParams = new MultivaluedMapImpl();
 		searchParams.add("db", "pubmed");
 		searchParams.add("term", searchTerm);
+		searchParams.add("retMax", ""+returnMax);
 		return search(searchParams);
 	}
 
@@ -249,7 +250,8 @@ public class PubmedRestClient {
 
 	public static void main(String[] args) throws JAXBException {
 		PubmedRestClient restClient = new PubmedRestClient();
-		restClient.searchPubmed("Doxapram");
+		
+		restClient.searchPubmed("Doxapram", 10);
 		restClient
 				.searchPubmedByTitle("Anaesthetic influences on brain haemodynamics in the rat and their significance to biochemical, neuropharmacological and drug disposition studies.");
 		PubmedArticle pubmedArticle = restClient.fetchPubmedArticle(2764997L);
