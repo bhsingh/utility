@@ -10,6 +10,7 @@ import gov.nih.nlm.ncbi.eutils.generated.esearch.ESearchResult;
 import gov.nih.nlm.ncbi.eutils.generated.esearch.Id;
 import gov.nih.nlm.ncbi.eutils.generated.esearch.IdList;
 
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,6 +26,9 @@ import javax.xml.bind.JAXBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import scala.actors.threadpool.Arrays;
+
+import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 
 import com.google.common.base.Joiner;
@@ -33,8 +37,50 @@ import com.sun.jersey.core.util.MultivaluedMapImpl;
 public class MigraineChemicalFinder {
 
 	public static void main(String[] args) throws JAXBException, IOException {
-		fromPubmed();
+		overlap();
+		
 	}
+	
+	private static final void overlap() throws IOException{
+		CSVReader chemicalReader = new CSVReader(new FileReader("/Users/bhsingh/Desktop/chemicals.txt"));
+		List<String[]> chemicalLines = chemicalReader.readAll();
+		Map<String, String[]> chemicalsMap = new HashMap<String, String[]>();
+		for (String[] columns : chemicalLines) {
+			chemicalsMap.put(columns[0].trim().toLowerCase(), columns);
+		}
+		chemicalReader.close();
+		
+		CSVReader csvReader = new CSVReader(new FileReader("/Users/bhsingh/Desktop/spine.txt"));
+		Map<String, String[]> spineMap = new HashMap<String, String[]>();
+		List<String[]> lines = csvReader.readAll();
+		for (String[] columns : lines) {
+			spineMap.put(columns[0].trim().toLowerCase(), columns);
+		}
+		csvReader.close();
+		
+		CSVReader wytzeReader = new CSVReader(new FileReader("/Users/bhsingh/Desktop/wytze.csv"));
+		List<String[]> wytzeLines = wytzeReader.readAll();
+		
+		CSVWriter csvWriter = new CSVWriter(new FileWriter("/Users/bhsingh/Desktop/output-all.csv"));
+		for (String[] columns : wytzeLines) {
+			List<String> output = new ArrayList<String>();
+			String compoundName = columns[0].trim().toLowerCase();
+			output.add(compoundName);
+			if(chemicalsMap.containsKey(compoundName)){
+				output.addAll(Arrays.asList(chemicalsMap.get(compoundName)));
+			}
+			if(spineMap.containsKey(compoundName)){
+				output.addAll(Arrays.asList(spineMap.get(compoundName)));
+			}
+			csvWriter.writeNext(output.toArray(new String[output.size()]));
+		}
+		wytzeReader.close();
+		csvWriter.flush();
+		csvWriter.close();
+		
+		
+	}
+	
 	private static void fromPubmed() throws IOException, JAXBException {
 		Map<String, Set<Integer>> chemicalMap = new HashMap<String, Set<Integer>>();
 		Map<String, Set<Integer>> spinalMap = new HashMap<String, Set<Integer>>();
