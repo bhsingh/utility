@@ -28,8 +28,8 @@ import au.com.bytecode.opencsv.CSVWriter;
 public class TestTwitterJ {
 
 	public static void main(String[] args) throws TwitterException, IOException {
-		// search();
-		testStreaming();
+		search();
+		// testStreaming();
 	}
 
 	private static void testStreaming() throws IOException {
@@ -113,21 +113,34 @@ public class TestTwitterJ {
 		twitterStream.filter(filterQuery);
 	}
 
-	private static void search() throws TwitterException {
+	private static void search() throws TwitterException, IOException {
 		// The factory instance is re-useable and thread safe.
 		TwitterFactory factory = new TwitterFactory();
 		AccessToken accessToken = loadAccessToken();
 		Twitter twitter = factory.getInstance();
 		twitter.setOAuthConsumer(TwitterAccount.CONSUMER_KEY.getValue(), TwitterAccount.CONSUMER_SECRET.getValue());
 		twitter.setOAuthAccessToken(accessToken);
-		Query query = new Query("#Actos");
-		query.setLang("en");
-		query.setCount(100);
+		Query query = new Query("pentavalent vaccine india");
+		query.setCount(1000);
+//		query.since("2009-12-12");
 		QueryResult result = twitter.search(query);
+		List<String[]> allLineStrings = new ArrayList<String[]>();
 		for (Status status : result.getTweets()) {
-			System.out.println(status.getCreatedAt() + " " + status.isRetweet() + " " + "@"
-					+ status.getUser().getScreenName() + ":" + status.getText());
+			// System.out.println(status.getCreatedAt() + " " +
+			// status.isRetweet() + " " + "@"
+			// + status.getUser().getScreenName() + ":" + status.getText());
+			System.out.println(status.toString());
+			allLineStrings.add(new String[] { status.getCreatedAt().toString(), "" + status.isRetweet(),
+					status.getUser().getScreenName(), status.getUser().getName(), status.getText() });
 		}
+		writeOutToCsv("/Users/bhsingh/Desktop/india.csv", allLineStrings);
+	}
+
+	private static void writeOutToCsv(String outFile, List<String[]> allLines) throws IOException {
+		CSVWriter csvWriter = new CSVWriter(new FileWriter(outFile));
+		csvWriter.writeAll(allLines);
+		csvWriter.flush();
+		csvWriter.close();
 	}
 
 	private static AccessToken loadAccessToken() {

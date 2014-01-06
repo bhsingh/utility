@@ -6,8 +6,8 @@ import java.sql.SQLException;
 
 public class DatabaseUtility {
 	private static final String USER = "root";
-	private static final String PASSWORD = "21biosemantiek!?";
-	private static final String URL = "jdbc:mysql://10.218.27.190:3306/Medline_2012";
+	private static final String PASSWORD = "";
+	private static final String URL = "jdbc:mysql://localhost:3306/umls2012aa";
 	private Connection connection;
 
 	public DatabaseUtility() throws SQLException, ClassNotFoundException {
